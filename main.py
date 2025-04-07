@@ -20,8 +20,7 @@ def get_chat_completion(messages):
         temperature=1,
     )
 
-
-prompt = input()
+prompt = "What are you?"
 
 messages = [
     {
