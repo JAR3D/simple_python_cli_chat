@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 
 from openai import OpenAI
 
+from tools import calculate_tokens_cost, MODEL_35_TURBO
+
 load_dotenv()
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -20,20 +22,26 @@ def get_chat_completion(messages):
         temperature=1,
     )
 
-prompt = "What are you?"
+user_input = input("Enter a message: ")
 
 messages = [
     {
         "role": "user",
-        "content": prompt
+        "content": user_input
     },
     {
         "role": "system",
-        "content": "You are an helpful assistant for a simple CLI chat. Only respond with text messages. Get creative with the answers!"
+        "content": """
+            You are an helpful assistant for a simple CLI chat. Only respond with text messages. Get creative with the answers!
+            If in your response you mention a number, for example 'seven', please write it as '7'."""
     }
 ]
 
 chat_completion = get_chat_completion(messages)
 gpt_response = chat_completion.choices[0].message.content
 
-print(gpt_response)
+total_usage_costs = calculate_tokens_cost(MODEL_35_TURBO, chat_completion)
+
+print("You:", user_input)
+print("Assistant: ", gpt_response)
+print("Cost:", f"${total_usage_costs:.8f}")
