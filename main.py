@@ -1,34 +1,7 @@
-import os
-from dotenv import load_dotenv
-
-from openai import OpenAI
-
+from openai_api import get_chat_completion
 from tools import calculate_tokens_cost, MODEL_35_TURBO
 
-load_dotenv()
-
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-OPENAI_API_BASE_URL = os.environ.get("OPENAI_API_BASE_URL")
-
-client = OpenAI(
-    api_key=OPENAI_API_KEY,
-    base_url=OPENAI_API_BASE_URL,
-)
-
-def get_chat_completion(messages):
-    return client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=messages,
-        temperature=1,
-    )
-
-user_input = input("Enter a message: ")
-
 messages = [
-    {
-        "role": "user",
-        "content": user_input
-    },
     {
         "role": "system",
         "content": """
@@ -37,11 +10,27 @@ messages = [
     }
 ]
 
-chat_completion = get_chat_completion(messages)
-gpt_response = chat_completion.choices[0].message.content
+while True:
+    # Get user input
+    user_input = input("Enter a message: ")
 
-total_usage_costs = calculate_tokens_cost(MODEL_35_TURBO, chat_completion)
+    # Add user input to messages
+    messages.append(
+        {
+            "role": "user",
+            "content": user_input
+        }
+    )
 
-print("You:", user_input)
-print("Assistant: ", gpt_response)
-print("Cost:", f"${total_usage_costs:.8f}")
+    # Get chat completion
+    chat_completion = get_chat_completion(messages)
+    # Extract the assistant's message
+    gpt_message = chat_completion.choices[0].message
+    # Append the assistant's message to messages
+    messages.append(gpt_message)
+
+    total_usage_costs = calculate_tokens_cost(MODEL_35_TURBO, chat_completion)
+
+    print("You:", user_input)
+    print("Assistant: ", gpt_message.content)
+    print("Cost:", f"${total_usage_costs:.8f}")
