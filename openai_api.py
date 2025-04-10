@@ -14,9 +14,27 @@ client = OpenAI(
 )
 
 
-def get_chat_completion(messages):
+def get_chat_completion(messages, tools=None, tool_choice="auto"):
     return client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=messages,
         temperature=1,
+        tools=tools,
+        tool_choice=tool_choice
     )
+
+
+functions_list = [
+    {
+        "type": "function",
+        "function": {
+            "name": "close_session",
+            "description": "Close the current session.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    }
+]
